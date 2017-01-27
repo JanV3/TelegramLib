@@ -8,40 +8,41 @@ namespace Omnia {
 
     class Telegram : public Kyb::TelegramBase {
         public:
-            Telegram() : TelegramBase(64) {
-            };
+            using Header = unsigned int;
+            using Footer = unsigned int;
 
             Telegram(Kyb::TelegramBase::DataVector& dv) : TelegramBase(dv) {
             };
 
             Telegram(short id) : TelegramBase(64) {
-                setId<short>(id);
+                set(id_position, id);
+                header = 0xDDCCBBAA;
+                set(header_position, header);
+                footer = 0xAABBCCDD;
+                set(footer_position, footer);
             };
 
-            Telegram(size_t id_position, short id) : TelegramBase(64) {
-                this->id_position = id_position;
-                setId<short>(id);
-            };
-
-            void setIdPosition(size_t id_position){
-                this->id_position = id_position;
+            short getId(){
+                return get<short>(id_position);
             }
 
-            size_t getIdPosition(){
-                return id_position;
+            void setId(short id){
+                set(id_position, id);
             }
 
-            template<typename T>
-                T getId(){
-                    return get<T>(id_position);
-                }
+            unsigned int getHeader(){
+                return get<Header>(header_position);
+            }
 
-            template<typename T>
-                void setId(T id){
-                    return set<T>(id_position, id);
-                }
+            unsigned int getFooter(){
+                return get<Footer>(footer_position);
+            }
 
         private:
-            size_t id_position = 0;
+            size_t header_position = 0;
+            size_t id_position = 4;
+            size_t footer_position = 60;
+            Header header;
+            Footer footer;
     };
 }

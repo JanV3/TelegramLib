@@ -39,12 +39,16 @@ namespace Kyb {
             inv_endianness = status;
         }
 
+        size_t size(){
+            return dv.size();
+        }
+
         protected:
         template<typename T>
             T get(size_t position){
                 if(position + sizeof(T) > dv.size())
                     return T();
-                return static_cast<T>(*(dv.begin() + position));
+                return static_cast<T>(dv.at(position));
             }
 
         template<typename T>
@@ -53,6 +57,7 @@ namespace Kyb {
                     return;
                 *(dv.begin() + position) = value;
             }
+
 
         private:
         DataVector dv;
