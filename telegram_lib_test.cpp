@@ -17,6 +17,12 @@ namespace Omnia {
                 set<int>(2, ckd);
             }
     };
+
+    class Telegram120 : public Telegram {
+        public:
+            Telegram120() : Telegram(120, 12) {
+            };
+    };
 }
 
 TEST_CASE( "Check ID of inherited telegram and base telegram") {
@@ -39,12 +45,14 @@ TEST_CASE( "Size is not changed" ) {
     REQUIRE( kt.size() == 64 );
 }
 
-TEST_CASE( "Header is 0xDDCCBBAA" ) {
+TEST_CASE( "Check header & footer (normal endianness)" ) {
     auto t = Omnia::Telegram110();
     REQUIRE( t.getHeader() == Omnia::Telegram::Header(0xDDCCBBAA) );
+    REQUIRE( t.getFooter() == Omnia::Telegram::Footer(0xAABBCCDD) );
 }
 
-TEST_CASE( "Footer is 0xAABBCCDD" ) {
-    auto t = Omnia::Telegram110();
+TEST_CASE( "Check header & footer (inverted endianness)" ) {
+    auto t = Omnia::Telegram120();
+    REQUIRE( t.getHeader() == Omnia::Telegram::Header(0xDDCCBBAA) );
     REQUIRE( t.getFooter() == Omnia::Telegram::Footer(0xAABBCCDD) );
 }
