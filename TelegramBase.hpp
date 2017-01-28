@@ -1,8 +1,23 @@
-#include <vector>
+#ifndef MESSAGING_TELEGRAM_BASE_H
+#define MESSAGING_TELEGRAM_BASE_H
 
-namespace Kyb {
+#include <vector>
+#include <string>
+#include <iomanip>
+#include <sstream>
+
+namespace Messaging {
 
     using namespace std;
+
+    template<typename T>
+        string toHex(T first, T second){
+            stringstream ss;
+            for(; first != second; ++first){
+                ss << setw(2) << setfill('0') << hex << static_cast<unsigned int>(*first) << " ";
+            }
+            return ss.str();
+        }
 
     bool isLittleEndian()
     {
@@ -67,6 +82,10 @@ namespace Kyb {
                 return dv.size();
             }
 
+            string print(){
+                return toHex(dv.begin(), dv.end());
+            }
+
         protected:
             template<typename T>
                 T get(size_t position){
@@ -99,3 +118,4 @@ namespace Kyb {
             bool little_endian = false;
     };
 }
+#endif /* ifndef MESSAGING_TELEGRAM_BASE_H */
