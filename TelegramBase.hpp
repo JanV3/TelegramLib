@@ -120,6 +120,9 @@ namespace Messaging {
                 return dv.size();
             }
 
+            /**
+             * @return Hexadecimal formatted string
+             */
             string print(){
                 return toHex(dv.begin(), dv.end());
             }
