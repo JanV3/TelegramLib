@@ -1,6 +1,6 @@
 #define CATCH_CONFIG_MAIN
-#include "catch.hpp"
-#include "Telegram.hpp"
+#include "vendor/catch.hpp"
+#include "include/Telegram.hpp"
 #include <iostream>
 
 namespace Project1 {

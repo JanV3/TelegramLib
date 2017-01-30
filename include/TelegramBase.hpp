@@ -1,3 +1,10 @@
+
+/**
+\mainpage The Telegram Library
+
+This is a simple library that create telegram(data vector) of any size. Library automatically ensures that encoded message have big endianness.
+*/
+
 #ifndef MESSAGING_TELEGRAM_BASE_H
 #define MESSAGING_TELEGRAM_BASE_H
 
@@ -10,6 +17,15 @@ namespace Messaging {
 
     using namespace std;
 
+    /**
+     * @brief Convert input range to hexadecimal string.
+     *
+     * @tparam T
+     * @param first from iterator
+     * @param second to iterator
+     *
+     * @return string with hexadecimal representation of input range
+     */
     template<typename T>
         string toHex(T first, T second){
             stringstream ss;
@@ -19,6 +35,12 @@ namespace Messaging {
             return ss.str();
         }
 
+    /**
+     * @brief Function to runtime check of system endianness
+     *
+     * @return True if system is little endian
+     * @return False if system is big endian
+     */
     bool isLittleEndian()
     {
         short int number = 0x1;
@@ -26,6 +48,14 @@ namespace Messaging {
         return (numPtr[0] == 1);
     }
 
+    /**
+     * @brief Swap bytes of input type
+     *
+     * @tparam T type of input parameter
+     * @param input value
+     *
+     * @return output value with swapped bytes
+     */
     template<typename T>
         T swapBytes(const T input){
             T output;
@@ -53,7 +83,7 @@ namespace Messaging {
             using DataVector = std::vector<DataUnit>;
 
             /**
-             * @brief Constructor with given size of telegram
+             * @brief Create telegram with specific size
              *
              * @param size of telegram
              */
@@ -63,7 +93,7 @@ namespace Messaging {
             }
 
             /**
-             * @brief Constructor for object creation using input data vector (e.g. received data from socket, file, serial port, etc.). Input data are copyied.
+             * @brief Create telegram from DataVector (received data from socket, file, serial port, etc.). Input data are copyied.
              *
              * @param dv input data vector
              */
@@ -73,7 +103,7 @@ namespace Messaging {
             }
 
             /**
-             * @brief Constructor for object creation using range of data given by iterators.
+             * @brief Create telegram by range given iterators
              *
              * @param first     from range
              * @param second    to range
