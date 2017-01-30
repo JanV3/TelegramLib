@@ -44,40 +44,78 @@ namespace Messaging {
             return output;
         };
 
+    /**
+     * @brief Base of telegram. This class represents vector of data with getters and setters and also handles endianness of system.
+     */
     class TelegramBase {
         public:
             using DataUnit = unsigned char;
             using DataVector = std::vector<DataUnit>;
 
+            /**
+             * @brief Constructor with given size of telegram
+             *
+             * @param size of telegram
+             */
             TelegramBase(size_t size){
                 dv.resize(size);
                 little_endian = isLittleEndian();
             }
 
+            /**
+             * @brief Constructor for object creation using input data vector (e.g. received data from socket, file, serial port, etc.). Input data are copyied.
+             *
+             * @param dv input data vector
+             */
             TelegramBase(DataVector& dv){
                 this->dv = dv;
                 little_endian = isLittleEndian();
             }
 
+            /**
+             * @brief Constructor for object creation using range of data given by iterators.
+             *
+             * @param first     from range
+             * @param second    to range
+             */
             TelegramBase(DataVector::iterator first, DataVector::iterator second){
                 dv.resize(std::distance(first, second));
                 std::copy(first, second, dv.begin());
                 little_endian = isLittleEndian();
             }
 
+            /**
+             * @brief Method to set range of data given by iterators.
+             *
+             * @param first     from range
+             * @param second    to range
+             */
             void setDataVector(DataVector::iterator first, DataVector::iterator second){
                 dv.resize(std::distance(first, second));
                 std::copy(first, second, dv.begin());
             }
 
+            /**
+             * @brief Method for setting data vector (e.g. received data from socket, file, serial port, etc.). Input data are copyied.
+             *
+             * @param dv input data vector
+             */
             void setDataVector(DataVector& dv){
                 this->dv = dv;
             }
 
+            /**
+             * @brief Returns reference to underlying data vector
+             *
+             * @return DataVector&
+             */
             DataVector& getDataVector(){
                 return dv;
             }
 
+            /**
+             * @return Size of underlying data vector
+             */
             size_t size(){
                 return dv.size();
             }

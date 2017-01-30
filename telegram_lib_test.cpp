@@ -77,7 +77,6 @@ TEST_CASE( "Cast to Telegram 120" ) {
     REQUIRE( mt.getId() == 120 );
     if(mt.getId() == 120) {
         auto t = static_cast<Project2::Telegram120*>(&mt);
-        std::cout << t->print() << std::endl;
         REQUIRE( t->getHeader() == Messaging::Telegram::Header(0xDDCCBBAA) );
         REQUIRE( t->getFooter() == Messaging::Telegram::Footer(0xAABBCCDD) );
     }

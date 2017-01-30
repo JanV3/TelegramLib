@@ -1,5 +1,6 @@
-project(TelegramLibTest)
-
+cmake_minimum_required(VERSION 3.7)
+project(TelegramLib)
 add_definitions(-std=c++11)
-
-add_executable(TelegramLibTest telegram_lib_test.cpp)
+enable_testing(true)
+add_test(NAME "TestOfTelegramLib" COMMAND tltest)
+add_executable(tltest telegram_lib_test.cpp)
