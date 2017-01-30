@@ -42,7 +42,7 @@ namespace Messaging {
                     set(header_position, headerValue);
                 }
                 if (footerValue != 0) {
-                    set(size() - footer_position, footerValue);
+                    set(footer_position, footerValue, true);
                 }
             }
 
