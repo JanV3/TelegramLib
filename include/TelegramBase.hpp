@@ -164,6 +164,15 @@ namespace TelegramLib {
             }
 
         protected:
+            /**
+             * @brief Get value of data type T from specified position
+             *
+             * @tparam T
+             * @param position of data type T in telegram
+             *
+             * @return value of data type
+             * @return Default value of constructed data type if position is out of telegram size
+             */
             template<typename T>
                 T get(size_t position){
                     if(position + sizeof(T) > dv.size())
@@ -175,6 +184,14 @@ namespace TelegramLib {
                     return value;
                 }
 
+            /**
+             * @brief Set value of data type T at specified position
+             *
+             * @tparam T data type
+             * @param offset of first byte of data type
+             * @param value that is writed at specified offset in telegram
+             * @param from_end is flag that specifies that offset is from end of telegram
+             */
             template<typename T>
                 void set(size_t offset, T value, bool from_end = false){
                     size_t position = offset;
