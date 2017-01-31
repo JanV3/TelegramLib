@@ -1,37 +1,49 @@
-#ifndef MESSAGING_TELEGRAM_H
-#define MESSAGING_TELEGRAM_H
+#ifndef TELEGRAMLIB_TELEGRAMHFI_H
+#define TELEGRAMLIB_TELEGRAMHFI_H
 
 #include "TelegramBase.hpp"
 
-namespace Messaging {
+namespace TelegramLib {
 
     using namespace std;
 
     /**
      * @brief Class that represents telegram with specified ID, header and footer
      */
-    class Telegram : public TelegramBase {
+    class TelegramHFI : public TelegramBase {
         public:
+
+            /**
+             * @brief Data type of telegram Header field
+             */
             using Header = unsigned int;
+
+            /**
+             * @brief Data type of telegram Footer field
+             */
             using Footer = unsigned int;
+
+            /**
+             * @brief Data type of telegram ID field
+             */
+            using Id = short;
 
             /**
              * @brief Create telegram using data vector
              *
              * @param dv
              */
-            Telegram(TelegramBase::DataVector& dv) : TelegramBase(dv) {
-            };
+            TelegramHFI(TelegramBase::DataVector& dv) : TelegramBase(dv) {};
 
             /**
              * @brief Create telegram using telegram id and size
              *
              * @param id ID of telegram
-             * @param base_size Size of telegram (default value 64)
+             * @param base_size Size of telegram
              */
-            Telegram(short id, size_t base_size = 64) : TelegramBase(base_size) {
-                set(id_position, id);
-                init();
+            TelegramHFI(Id id, size_t base_size = 64) : TelegramBase(base_size) {
+                setId(id);
+                setHF();
             };
 
             /**
@@ -39,8 +51,8 @@ namespace Messaging {
              *
              * @return
              */
-            short getId(){
-                return get<short>(id_position);
+            Id getId(){
+                return get<Id>(id_position);
             }
 
             /**
@@ -48,7 +60,7 @@ namespace Messaging {
              *
              * @param id
              */
-            void setId(short id){
+            void setId(Id id){
                 set(id_position, id);
             }
 
@@ -57,7 +69,7 @@ namespace Messaging {
              *
              * @return telegram header
              */
-            unsigned int getHeader(){
+            Header getHeader(){
                 return get<Header>(header_position);
             }
 
@@ -66,12 +78,21 @@ namespace Messaging {
              *
              * @return telegram footer
              */
-            unsigned int getFooter(){
+            Footer getFooter(){
                 return get<Footer>(size() - footer_position);
             }
 
+            /**
+             * @brief Check telegram validity by checking header and footer values at defined positions.
+             *
+             * @return True if telegram is valid
+             */
+            bool isValid(){
+                return ( getHeader() == headerValue ) && ( getFooter() == footerValue );
+            }
+
         private:
-            void init(){
+            void setHF(){
                 if(headerValue != 0){
                     set(header_position, headerValue);
                 }
@@ -88,4 +109,4 @@ namespace Messaging {
             Footer footerValue = 0xAABBCCDD;
     };
 }
-#endif /* ifndef MESSAGING_TELEGRAM_H */
+#endif /* ifndef TELEGRAMLIB_TELEGRAMHFI_H */

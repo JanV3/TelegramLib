@@ -1,19 +1,18 @@
-
 /**
-\mainpage The Telegram Library
+  \mainpage TelegramLib
 
-This is a simple library that create telegram(data vector) of any size. Library automatically ensures that encoded message have big endianness.
-*/
+  TelegramLib is simple library to create and/or parse telegrams/messages.
+  */
 
-#ifndef MESSAGING_TELEGRAM_BASE_H
-#define MESSAGING_TELEGRAM_BASE_H
+#ifndef TELEGRAMLIB_TELEGRAMBASE_H
+#define TELEGRAMLIB_TELEGRAMBASE_H
 
 #include <vector>
 #include <string>
 #include <iomanip>
 #include <sstream>
 
-namespace Messaging {
+namespace TelegramLib {
 
     using namespace std;
 
@@ -79,7 +78,14 @@ namespace Messaging {
      */
     class TelegramBase {
         public:
+            /**
+             * @brief Data type of telegram data unit
+             */
             using DataUnit = unsigned char;
+
+            /**
+             * @brief Data type of array of telegram data units
+             */
             using DataVector = std::vector<DataUnit>;
 
             /**
@@ -162,11 +168,11 @@ namespace Messaging {
                 T get(size_t position){
                     if(position + sizeof(T) > dv.size())
                         return T();
+                    T value = *reinterpret_cast<T*>(dv.data() + position);
                     if(little_endian){
-                        return swapBytes(*reinterpret_cast<T*>(dv.data() + position));
-                    } else {
-                        return *reinterpret_cast<T*>(dv.data() + position);
+                        return swapBytes(value);
                     }
+                    return value;
                 }
 
             template<typename T>
@@ -176,11 +182,13 @@ namespace Messaging {
                         position = dv.size() - offset;
                     if(position + sizeof(T) > dv.size())
                         return;
+
+                    T new_value = value;
                     if(little_endian){
-                        *reinterpret_cast<T*>(dv.data() + position) = swapBytes(value);
-                    } else {
-                        *reinterpret_cast<T*>(dv.data() + position) = value;
+                        new_value = swapBytes(value);
                     }
+
+                    *reinterpret_cast<T*>(dv.data() + position) = new_value;
                 }
 
 
@@ -189,4 +197,4 @@ namespace Messaging {
             bool little_endian = false;
     };
 }
-#endif /* ifndef MESSAGING_TELEGRAM_BASE_H */
+#endif /* ifndef TELEGRAMLIB_TELEGRAMBASE_H */
