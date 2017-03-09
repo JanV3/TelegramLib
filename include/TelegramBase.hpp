@@ -45,8 +45,8 @@ string toHex(T first, T second)
 bool isLittleEndian()
 {
     short int number = 0x1;
-    char *numPtr = (char *)&number;
-    return (numPtr[0] == 1);
+    char *numPtr = reinterpret_cast<char*>(&number);
+    return numPtr[0] == 1;
 }
 
 /**

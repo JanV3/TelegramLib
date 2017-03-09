@@ -43,7 +43,12 @@ public:
     TelegramHFI(Id id, size_t base_size = 64) : TelegramBase(base_size)
     {
         setId(id);
-        setHF();
+        if (headerValue != 0) {
+            set(header_position, headerValue);
+        }
+        if (footerValue != 0) {
+            set(footer_position, footerValue, true);
+        }
     };
 
     /**
@@ -91,16 +96,6 @@ private:
     size_t footer_position = 4;
     Header headerValue = 0xDDCCBBAA;
     Footer footerValue = 0xAABBCCDD;
-
-    void setHF()
-    {
-        if (headerValue != 0) {
-            set(header_position, headerValue);
-        }
-        if (footerValue != 0) {
-            set(footer_position, footerValue, true);
-        }
-    }
 };
 }
 #endif /* ifndef TELEGRAMLIB_TELEGRAMHFI_H */
