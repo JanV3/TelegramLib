@@ -2,85 +2,103 @@
 #include "include/TelegramHFI.hpp"
 #include "vendor/catch.hpp"
 #include <iostream>
+#include <memory>
+#include <unordered_map>
 
 using namespace TelegramLib;
 
-namespace Project1 {
-class Telegram110 : public TelegramHFI {
-public:
-    Telegram110() : TelegramHFI(TelegramHFI::Id(110)){};
-
-    int ckd() { return get<int>(2); }
-
-    void ckd(int ckd) { set<int>(2, ckd); }
-};
-}
-
-namespace Project2 {
+namespace Project {
 class Telegram120 : public TelegramHFI {
 public:
-    Telegram120() : TelegramHFI(TelegramHFI::Id(120), 12){};
-};
-}
+    Telegram120()
+        : TelegramHFI(120){};
 
-namespace Project3 {
-class BadTelegram : public TelegramHFI {
+    int ckd()
+    {
+        return get<int>(8);
+    }
+
+    void ckd(int value)
+    {
+        set(8, value);
+    }
+};
+
+class Telegram121 : public TelegramHFI {
 public:
-    BadTelegram() : TelegramHFI(TelegramHFI::Id(100)){};
+    Telegram121()
+        : TelegramHFI(121){};
+};
 
-    int param() { return get<int>(64); }
+class Telegram122 : public TelegramHFI {
+public:
+    Telegram122()
+        : TelegramHFI(122, 12){};
+};
+
+class TelegramFactory : public TelegramHFIFactory {
+public:
+    TelegramFactory()
+    {
+        reg(120, [](){ return std::make_unique<Telegram120>(); });
+        reg(121, [](){ return std::make_unique<Telegram121>(); });
+        reg(122, [](){ return std::make_unique<Telegram122>(); });
+    }
 };
 }
+
 
 TEST_CASE("Check ID of inherited telegram and base telegram")
 {
-    auto t = Project1::Telegram110();
-    auto kt = TelegramHFI(t.getDataVector());
-    REQUIRE(t.getId() == 110);
-    REQUIRE(kt.getId() == 110);
+    Project::TelegramFactory tf;
+    auto t = tf.create(120);
+    auto kt = TelegramHFI(t->getData());
+    REQUIRE(t->getId() == 120);
+    REQUIRE(kt.getId() == 120);
 }
 
 TEST_CASE("Check value of setted parameter")
 {
-    auto t = Project1::Telegram110();
+    auto t = Project::Telegram120();
     t.ckd(32);
     REQUIRE(t.ckd() == 32);
 }
 
 TEST_CASE("Size is not changed")
 {
-    auto t = Project1::Telegram110();
-    auto kt = TelegramHFI(t.getDataVector());
+    auto t = Project::Telegram121();
+    auto kt = TelegramHFI(t.getData());
     REQUIRE(t.size() == 64);
     REQUIRE(kt.size() == 64);
 }
 
 TEST_CASE("Telegram 110 header and footer check")
 {
-    auto t = Project1::Telegram110();
-    REQUIRE(t.isValid());
-}
-
-TEST_CASE("Telegram 120 header and footer check")
-{
-    auto t = Project2::Telegram120();
+    auto t = Project::Telegram122();
     REQUIRE(t.isValid());
 }
 
 TEST_CASE("Cast to Telegram 120")
 {
-    TelegramBase::DataVector dv = {0xdd, 0xcc, 0xbb, 0xaa, 0x00, 0x78,
-                                   0x00, 0x00, 0xaa, 0xbb, 0xcc, 0xdd};
-    auto mt = TelegramHFI(dv);
+    TelegramBase::Data data = {0xdd, 0xcc, 0xbb, 0xaa, 0x00, 0x78, 0x00, 0x00, 0xaa, 0xbb, 0xcc, 0xdd};
+    auto mt = TelegramHFI(data);
     REQUIRE(mt.getId() == 120);
     if (mt.getId() == 120) {
-        auto t = static_cast<Project2::Telegram120 *>(&mt);
+        auto t = static_cast<Project::Telegram122*>(&mt);
         REQUIRE(t->isValid());
     }
 }
 
-TEST_CASE("Returns ZERO if not in range")
-{
-    auto t = Project3::BadTelegram();
-    REQUIRE(t.param() == 0);
-}
+// TODO: make polymorphic switch, probably visitor pattern...
+//TEST_CASE("Create telegram by data")
+//{
+    //auto process = [](Project::Telegram120 const * const telegram){ return telegram->getId(); };
+    //Project::TelegramFactory tf;
+    //TelegramBase::Data data = {0xdd, 0xcc, 0xbb, 0xaa, 0x00, 0x78, 0x00, 0x00, 0xaa, 0xbb, 0xcc, 0xdd};
+    //auto mt = tf.create(std::move(data));
+    //REQUIRE(process(mt) == 120);
+    //if (mt->getId() == 120) {
+        //auto t = static_cast<Project::Telegram120*>(mt.get());
+        //REQUIRE(t->isValid());
+    //}
+//}

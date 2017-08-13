@@ -1,6 +1,9 @@
 #ifndef TELEGRAMLIB_TELEGRAMHFI_H
 #define TELEGRAMLIB_TELEGRAMHFI_H
 
+#include <unordered_map>
+#include <functional>
+
 #include "TelegramBase.hpp"
 
 namespace TelegramLib {
@@ -30,9 +33,19 @@ public:
     /**
      * @brief Create telegram using data vector
      *
-     * @param dv
+     * @param data
      */
-    TelegramHFI(TelegramBase::DataVector &dv) : TelegramBase(dv){};
+    TelegramHFI(TelegramBase::Data&& data)
+        : TelegramBase(std::forward<TelegramBase::Data>(data)){};
+
+    /**
+     * @brief Create telegram using data vector
+     *
+     * @param data
+     */
+    TelegramHFI(TelegramBase::Data& data)
+        : TelegramBase(data)
+    {};
 
     /**
      * @brief Create telegram using telegram id and size
@@ -40,7 +53,8 @@ public:
      * @param id ID of telegram
      * @param base_size Size of telegram
      */
-    TelegramHFI(Id id, size_t base_size = 64) : TelegramBase(base_size)
+    TelegramHFI(Id id, size_t base_size = 64)
+        : TelegramBase(base_size)
     {
         setId(id);
         if (headerValue != 0) {
@@ -56,28 +70,40 @@ public:
      *
      * @return
      */
-    Id getId() { return get<Id>(id_position); }
+    Id getId() const
+    {
+        return get<Id>(id_position);
+    }
 
     /**
      * @brief Set telegram ID
      *
      * @param id
      */
-    void setId(Id id) { set(id_position, id); }
+    void setId(Id id)
+    {
+        set(id_position, id);
+    }
 
     /**
      * @brief Get telegram header field
      *
      * @return telegram header
      */
-    Header getHeader() { return get<Header>(header_position); }
+    Header getHeader()
+    {
+        return get<Header>(header_position);
+    }
 
     /**
      * @brief Get telegram footer fiels
      *
      * @return telegram footer
      */
-    Footer getFooter() { return get<Footer>(size() - footer_position); }
+    Footer getFooter()
+    {
+        return get<Footer>(size() - footer_position);
+    }
 
     /**
      * @brief Check telegram validity by checking header and footer values at
@@ -96,6 +122,36 @@ private:
     size_t footer_position = 4;
     Header headerValue = 0xDDCCBBAA;
     Footer footerValue = 0xAABBCCDD;
+};
+
+class TelegramHFIFactory {
+    using TelegramHFIPtr = std::unique_ptr<TelegramHFI>;
+    using Builder = std::function<TelegramHFIPtr(void)>;
+    std::unordered_map<TelegramHFI::Id, Builder> builders_;
+
+public:
+    virtual ~TelegramHFIFactory()
+    {
+    }
+
+    TelegramHFIPtr create(TelegramHFI::Id id)
+    {
+        return builders_[id]();
+    }
+
+    TelegramHFIPtr create(TelegramBase::Data&& data)
+    {
+        auto hfi = TelegramHFI(std::forward<TelegramBase::Data>(data));
+        auto t = builders_[hfi.getId()]();
+        t->setData(std::move(hfi.getData()));
+        return t;
+    }
+
+protected:
+    void reg(TelegramHFI::Id id, Builder&& builder)
+    {
+        builders_[id] = builder;
+    }
 };
 }
 #endif /* ifndef TELEGRAMLIB_TELEGRAMHFI_H */

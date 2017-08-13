@@ -30,8 +30,7 @@ string toHex(T first, T second)
 {
     stringstream ss;
     for (; first != second; ++first) {
-        ss << setw(2) << setfill('0') << hex
-           << static_cast<unsigned int>(*first) << " ";
+        ss << setw(2) << setfill('0') << hex << static_cast<unsigned int>(*first) << " ";
     }
     return ss.str();
 }
@@ -45,7 +44,7 @@ string toHex(T first, T second)
 bool isLittleEndian()
 {
     short int number = 0x1;
-    char *numPtr = reinterpret_cast<char*>(&number);
+    char* numPtr = reinterpret_cast<char*>(&number);
     return numPtr[0] == 1;
 }
 
@@ -63,10 +62,11 @@ T swapBytes(const T input)
     T output;
     size_t type_size = sizeof(T);
 
-    if (type_size % 2 != 0) return input;
+    if (type_size % 2 != 0)
+        return input;
 
-    char *valueToConvert = (char *)&input;
-    char *returnValue = (char *)&output;
+    char* valueToConvert = (char*)&input;
+    char* returnValue = (char*)&output;
 
     for (int i = 0; i < type_size; i++) {
         returnValue[i] = valueToConvert[type_size - 1 - i];
@@ -84,12 +84,12 @@ public:
     /**
      * @brief Data type of telegram data unit
      */
-    using DataUnit = unsigned char;
+    using Byte = unsigned char;
 
     /**
      * @brief Data type of array of telegram data units
      */
-    using DataVector = std::vector<DataUnit>;
+    using Data = std::vector<Byte>;
 
     /**
      * @brief Create telegram with specific size
@@ -98,7 +98,7 @@ public:
      */
     TelegramBase(size_t size)
     {
-        dv.resize(size);
+        data_.resize(size);
         little_endian = isLittleEndian();
     }
 
@@ -106,11 +106,23 @@ public:
      * @brief Create telegram from DataVector (received data from socket, file,
      * serial port, etc.). Input data are copyied.
      *
-     * @param dv input data vector
+     * @param data_ input data vector
      */
-    TelegramBase(DataVector &dv)
+    TelegramBase(Data&& data)
     {
-        this->dv = dv;
+        this->data_ = data;
+        little_endian = isLittleEndian();
+    }
+
+    /**
+     * @brief Create telegram from DataVector (received data from socket, file,
+     * serial port, etc.). Input data are copyied.
+     *
+     * @param data_ input data vector
+     */
+    TelegramBase(Data& data)
+    {
+        this->data_ = data;
         little_endian = isLittleEndian();
     }
 
@@ -120,10 +132,10 @@ public:
      * @param first     from range
      * @param second    to range
      */
-    TelegramBase(DataVector::iterator first, DataVector::iterator second)
+    TelegramBase(Data::iterator first, Data::iterator second)
     {
-        dv.resize(std::distance(first, second));
-        std::copy(first, second, dv.begin());
+        data_.resize(std::distance(first, second));
+        std::copy(first, second, data_.begin());
         little_endian = isLittleEndian();
     }
 
@@ -133,36 +145,59 @@ public:
      * @param first     from range
      * @param second    to range
      */
-    void setDataVector(DataVector::iterator first, DataVector::iterator second)
+    void setData(Data::iterator first, Data::iterator second)
     {
-        dv.resize(std::distance(first, second));
-        std::copy(first, second, dv.begin());
+        data_.resize(std::distance(first, second));
+        std::copy(first, second, data_.begin());
     }
 
     /**
      * @brief Method for setting data vector (e.g. received data from socket,
      * file, serial port, etc.). Input data are copyied.
      *
-     * @param dv input data vector
+     * @param data_ input data vector
      */
-    void setDataVector(DataVector &dv) { this->dv = dv; }
+    void setData(Data&& data)
+    {
+        this->data_ = data;
+    }
+
+    /**
+     * @brief Method for setting data vector (e.g. received data from socket,
+     * file, serial port, etc.). Input data are copyied.
+     *
+     * @param data_ input data vector
+     */
+    void setData(Data& data)
+    {
+        this->data_ = data;
+    }
 
     /**
      * @brief Returns reference to underlying data vector
      *
      * @return DataVector&
      */
-    DataVector &getDataVector() { return dv; }
+    Data& getData()
+    {
+        return data_;
+    }
 
     /**
      * @return Size of underlying data vector
      */
-    size_t size() { return dv.size(); }
+    size_t size()
+    {
+        return data_.size();
+    }
 
     /**
      * @return Hexadecimal formatted string
      */
-    string print() { return toHex(dv.begin(), dv.end()); }
+    string print()
+    {
+        return toHex(data_.begin(), data_.end());
+    }
 
 protected:
     /**
@@ -176,10 +211,11 @@ protected:
      * telegram size
      */
     template <typename T>
-    T get(size_t position)
+    T get(size_t position) const
     {
-        if (position + sizeof(T) > dv.size()) return T();
-        T value = *reinterpret_cast<T *>(dv.data() + position);
+        if (position + sizeof(T) > data_.size())
+            return T();
+        T value = *reinterpret_cast<T*>(data_.data() + position);
         if (little_endian) {
             return swapBytes(value);
         }
@@ -199,19 +235,21 @@ protected:
     void set(size_t offset, T value, bool from_end = false)
     {
         size_t position = offset;
-        if (from_end) position = dv.size() - offset;
-        if (position + sizeof(T) > dv.size()) return;
+        if (from_end)
+            position = data_.size() - offset;
+        if (position + sizeof(T) > data_.size())
+            return;
 
         T new_value = value;
         if (little_endian) {
             new_value = swapBytes(value);
         }
 
-        *reinterpret_cast<T *>(dv.data() + position) = new_value;
+        *reinterpret_cast<T*>(data_.data() + position) = new_value;
     }
 
 private:
-    DataVector dv;
+    Data data_;
     bool little_endian = false;
 };
 }

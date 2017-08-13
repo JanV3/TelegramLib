@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(TelegramLib)
 
+set(CMAKE_CXX_STANDARD 14)
+
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
@@ -11,8 +13,6 @@ if(DOXYGEN_FOUND)
         COMMENT "Generating API documentation with Doxygen" VERBATIM
         )
 endif(DOXYGEN_FOUND)
-
-add_definitions(-std=c++11)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
